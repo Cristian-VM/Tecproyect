@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
-
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -12,31 +10,76 @@ use Illuminate\Support\Facades\Route;
 | contains the "web" middleware group. Now create something great!
 |
 */
+//Dashboard
+//login
+Route::get('admin', 'loginController@adminIndex')->name('admin.login');
+Route::post('admin', 'loginController@adminPosted');
 
-Route::resource('admin/categories', 'CategoryController')->names('categories');
-Route::resource('admin/subcategories', 'SubcategoryController')->names('subcategories');
-Route::resource('admin/tags', 'TagController')->names('tags');
-Route::resource('admin/posts', 'PostController')->names('posts');
-Route::resource('admin/products', 'ProductController')->names('products');
-Route::post('/comment/store','CommetController@store')->name('comment.add');
-Route::post('/reply/store','CommetController@replyStore')->name('reply.add');
+Route::group(['middleware' => 'admin'], function(){
 
-Route::post('/commentProduct/store','CommetController@productStore')->name('productComment.add');
-Route::post('/replyProduct/store','CommetController@productReplyStore')->name('productReply.add');
+ 
+    Route::get("/admin_panel", 'admin_panel\dashboardController@index')->name('admin.dashboard');
 
+    Route::get('admin/logout', 'loginController@adminLogout')->name('admin.logout');
+    //categories
+    Route::get('/admin_panel/categories', 'admin_panel\categoriesController@index')->name('admin.categories');
+    Route::post('/admin_panel/categories', 'admin_panel\categoriesController@posted');
 
-Route::delete('/reply/destroy/{commet}','CommetController@destroy')->name('comment.destroy');
-Route::get('/reply/{commet}/edit','CommetController@edit')->name('comment.edit');
-Route::put('/reply/{commet}','CommetController@update')->name('comment.update');
+    Route::get('/admin_panel/categories/edit/{id}', 'admin_panel\categoriesController@edit')->name('admin.categories.edit');
+    Route::post('/admin_panel/categories/edit/{id}', 'admin_panel\categoriesController@update');
 
-
+    Route::get('/admin_panel/categories/delete/{id}', 'admin_panel\categoriesController@delete')->name('admin.categories.delete');
+    Route::post('/admin_panel/categories/delete/{id}', 'admin_panel\categoriesController@destroy');
 
 
+    //products
+    Route::get('/admin_panel/products', 'admin_panel\productsController@index')->name('admin.products');
 
-Route::get('/', function () {
-    return view('welcome');
+    Route::get('/admin_panel/products/create', 'admin_panel\productsController@create')->name('admin.products.create');
+    Route::post('/admin_panel/products/create', 'admin_panel\productsController@store');
+
+    Route::get('/admin_panel/products/edit/{id}', 'admin_panel\productsController@edit')->name('admin.products.edit');
+    Route::post('/admin_panel/products/edit/{id}', 'admin_panel\productsController@update');
+
+    Route::get('/admin_panel/products/delete/{id}', 'admin_panel\productsController@delete')->name('admin.products.delete');
+    Route::post('/admin_panel/products/delete/{id}', 'admin_panel\productsController@destroy');
+
+    //order management 
+    Route::get('/admin_panel/management', 'admin_panel\managementController@manage')->name('admin.orderManagement');
+    Route::post('/admin_panel/management', 'admin_panel\managementController@update')->name('admin.orderUpdate');
+
 });
 
-Auth::routes();
+Route::get('/login', 'loginController@userIndex')->name('user.login');
+Route::post('/login', 'loginController@userPosted');
 
-Route::get('/home', 'HomeController@index')->name('home');
+//signup
+Route::get('/signup', 'signupController@userIndex')->name('user.signup');
+Route::post('/signup', 'signupController@userPosted');
+Route::post('/check_email', 'signupController@emailCheck')->name('user.signup.check_email');
+
+
+//user
+Route::get('/', 'user\userController@index')->name('user.home');
+Route::get('/product/{id}', 'user\userController@view')->name('user.product');
+
+Route::get('/search', 'user\userController@search')->name('user.search');
+Route::get('/search?c={id}', 'user\userController@view')->name('user.search.cat');
+
+
+
+Route::get('/view/{id}', 'user\userController@view')->name('user.view');
+Route::post('/view/{id}', 'user\userController@post');
+
+Route::get('/cart', 'user\userController@cart')->name('user.cart');
+Route::post('/cart', 'user\userController@confirm');
+
+Route::post('/edit_cart', 'user\userController@editCart')->name('user.editCart');
+Route::post('/delete_item_from_cart', 'user\userController@deleteCartItem')->name('user.deleteCartItem');
+
+
+Route::get('/logout', 'loginController@userLogout')->name('user.logout');
+
+Route::group(['middleware' => 'user'], function(){
+Route::get('/history', 'user\userController@history')->name('user.history');
+});

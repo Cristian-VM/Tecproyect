@@ -3,29 +3,29 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Product extends Model
-{ 
-    use SoftDeletes;
+{
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
     protected $fillable = [
-        'user_id','subcategory_id','name','slug','stock','quantity','actualPrice','previousPrice','discountRate','shortDescription','longDescription','state','status',
+        'name',
+        'image_name',
+        'description',
+        'colors',
+        'price',
+        'discount',
+        'tag',
+        'category_id'
     ];
-    protected $dates = ['deleted_at'];
 
-    public function images()
+    public function category()
     {
-        return $this->morphMany('App\Image', 'imageable');
+    	return $this->belongsTo('App\Category','category_id','id');
     }
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-    public function subcategory()
-    {
-        return $this->belongsTo(Subcategory::class);
-    }
-    public function comments(){
-        return $this->morphMany(Commet::class, 'commentable')->whereNull('parent_id')->orderBy('id','DESC');
-    }
+    
+    
 }
